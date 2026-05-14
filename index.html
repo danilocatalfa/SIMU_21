@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SimuRad21 — Plataforma de Simulación en Diagnóstico por Imágenes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@200;300;400;500;600&display=swap');
+:root{
+  --bg:#06070a;--bg2:#0b0f15;--bg3:#0f1420;--bg4:#070a0f;
+  --bdr:#172030;--bdr2:#1f3045;
+  --cyan:#00cccc;--cyan2:#009999;--blue:#0077ff;
+  --green:#00e676;--amber:#ffab00;--red:#ff3d3d;--purple:#9c6dff;
+  --t1:#c5d5e5;--t2:#5a7888;--t3:#283848;
+  --mono:'Share Tech Mono',monospace;--ui:'Rajdhani',sans-serif;--body:'Exo 2',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--body);min-height:100vh;overflow-x:hidden}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{position:fixed;inset:0;background:#040507;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:2rem}
+
+.inst-logo{font-family:var(--ui);font-size:.72rem;letter-spacing:.35em;color:var(--t2);text-transform:uppercase;margin-bottom:.5rem;text-align:center}
+.inst-name{font-family:var(--ui);font-size:1.1rem;font-weight:600;letter-spacing:.12em;color:var(--t1);text-align:center;margin-bottom:.3rem}
+.inst-carrera{font-family:var(--body);font-size:.78rem;letter-spacing:.15em;color:var(--t2);text-align:center;text-transform:uppercase;margin-bottom:2.5rem}
+
+.login-divider{width:220px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan2),transparent);margin:0 auto 2rem}
+
+.simurad-logo{font-family:var(--ui);font-size:3.2rem;font-weight:700;letter-spacing:.15em;color:var(--cyan);text-shadow:0 0 40px rgba(0,204,204,.5);text-align:center;animation:glow 2.5s ease-in-out infinite;margin-bottom:.3rem}
+.simurad-sub{font-family:var(--body);font-size:.72rem;letter-spacing:.3em;color:var(--t2);text-align:center;text-transform:uppercase;margin-bottom:2.5rem}
+
+.login-card{background:var(--bg3);border:1px solid var(--bdr2);padding:2rem;width:360px}
+.login-title{font-family:var(--ui);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-transform:uppercase;margin-bottom:1.2rem;text-align:center}
+.lfield{display:flex;flex-direction:column;gap:.25rem;margin-bottom:.9rem}
+.lfield label{font-size:.6rem;letter-spacing:.12em;color:var(--t3);text-transform:uppercase}
+.lfield input{background:var(--bg4);border:1px solid var(--bdr);color:var(--t1);padding:.55rem .7rem;font-family:var(--mono);font-size:.82rem;width:100%;outline:none;transition:border-color .2s}
+.lfield input:focus{border-color:var(--cyan2)}
+.lfield input::placeholder{color:var(--t3)}
+.login-btn{width:100%;font-family:var(--ui);font-size:.88rem;font-weight:600;letter-spacing:.18em;padding:.8rem;background:var(--cyan2);border:none;color:#fff;cursor:pointer;text-transform:uppercase;transition:all .3s;margin-top:.5rem}
+.login-btn:hover{background:var(--cyan)}
+.login-btn:disabled{opacity:.3;cursor:not-allowed}
+.login-err{font-family:var(--mono);font-size:.65rem;color:var(--red);text-align:center;margin-top:.5rem;display:none}
+
+@keyframes glow{0%,100%{text-shadow:0 0 40px rgba(0,204,204,.5)}50%{text-shadow:0 0 70px rgba(0,204,204,.85)}}
+
+/* ── MAIN HUB ── */
+#hubScreen{display:none;flex-direction:column;min-height:100vh}
+
+/* Topbar */
+.hub-top{height:52px;background:#040507;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem;flex-shrink:0}
+.hub-logo{font-family:var(--ui);font-size:1.3rem;font-weight:700;color:var(--cyan);letter-spacing:.12em}
+.hub-inst{font-family:var(--body);font-size:.68rem;color:var(--t2);border-left:1px solid var(--bdr);padding-left:1.2rem}
+.hub-user{font-family:var(--mono);font-size:.65rem;color:var(--t2);margin-left:auto;display:flex;align-items:center;gap:.8rem}
+.hub-user-name{color:var(--cyan)}
+.hub-help-btn{font-family:var(--mono);font-size:.62rem;padding:.22rem .6rem;background:transparent;border:1px solid var(--bdr2);color:var(--t2);cursor:pointer;transition:all .2s}
+.hub-help-btn:hover{border-color:var(--amber);color:var(--amber)}
+.hub-logout{font-family:var(--mono);font-size:.6rem;padding:.2rem .5rem;background:transparent;border:1px solid rgba(255,61,61,.3);color:rgba(255,100,100,.6);cursor:pointer;transition:all .2s}
+.hub-logout:hover{border-color:var(--red);color:var(--red)}
+.hub-credit{font-family:var(--mono);font-size:.5rem;color:var(--t3)}
+
+/* Hero */
+.hub-hero{background:linear-gradient(135deg,#060810 0%,#0a1020 50%,#060810 100%);border-bottom:1px solid var(--bdr);padding:2.5rem 2rem;display:flex;align-items:center;gap:2rem}
+.hub-hero-text{}
+.hub-hero-title{font-family:var(--ui);font-size:1.6rem;font-weight:700;letter-spacing:.06em;color:var(--t1);margin-bottom:.4rem}
+.hub-hero-title span{color:var(--cyan)}
+.hub-hero-desc{font-size:.78rem;color:var(--t2);line-height:1.7;max-width:600px}
+.hub-hero-tag{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;padding:.2rem .6rem;border:1px solid var(--cyan2);color:var(--cyan);margin-top:.8rem;text-transform:uppercase}
+
+/* Module grid */
+.hub-body{padding:2rem;flex:1}
+.hub-section-title{font-family:var(--ui);font-size:.65rem;letter-spacing:.25em;color:var(--t3);text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+.hub-section-title::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem;margin-bottom:2.5rem}
+
+.module-card{background:var(--bg3);border:1px solid var(--bdr);padding:1.4rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:.8rem}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;transition:transform .3s;transform:scaleX(0)}
+.module-card:hover{border-color:var(--bdr2);background:#121a24;transform:translateY(-2px)}
+.module-card:hover::before{transform:scaleX(1)}
+.module-card.available{cursor:pointer}
+.module-card.soon{cursor:default;opacity:.5}
+.module-card.ct::before{background:var(--cyan)}
+.module-card.rx::before{background:var(--amber)}
+.module-card.mg::before{background:var(--purple)}
+.module-card.mr::before{background:var(--green)}
+
+.module-card:hover .module-icon{transform:scale(1.1)}
+.module-icon{font-size:2rem;transition:transform .3s;flex-shrink:0;width:40px}
+.module-header{display:flex;align-items:flex-start;gap:.8rem}
+.module-info{}
+.module-tag{font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.25rem}
+.module-card.ct .module-tag{color:var(--cyan)}
+.module-card.rx .module-tag{color:var(--amber)}
+.module-card.mg .module-tag{color:var(--purple)}
+.module-card.mr .module-tag{color:var(--green)}
+.module-name{font-family:var(--ui);font-size:1rem;font-weight:600;color:var(--t1);letter-spacing:.04em}
+.module-desc{font-size:.68rem;color:var(--t2);line-height:1.6}
+.module-features{display:flex;flex-wrap:wrap;gap:.3rem}
+.module-feat{font-family:var(--mono);font-size:.56rem;padding:.1rem .4rem;border:1px solid var(--bdr2);color:var(--t3)}
+.module-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.module-status{font-family:var(--mono);font-size:.6rem}
+.module-card.available .module-status{color:var(--green)}
+.module-card.soon .module-status{color:var(--t3)}
+.module-launch{font-family:var(--ui);font-size:.72rem;font-weight:600;letter-spacing:.1em;padding:.35rem .9rem;border:1px solid;cursor:pointer;text-transform:uppercase;transition:all .2s;background:transparent}
+.module-card.ct .module-launch{border-color:var(--cyan2);color:var(--cyan)}
+.module-card.ct .module-launch:hover{background:var(--cyan2);color:#fff}
+.module-card.rx .module-launch{border-color:var(--amber);color:var(--amber)}
+.module-card.rx .module-launch:hover{background:var(--amber);color:#000}
+.module-card.soon .module-launch{border-color:var(--bdr);color:var(--t3);cursor:default}
+
+/* ── HELP PANEL ── */
+.help-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;display:none;justify-content:flex-end}
+.help-overlay.act{display:flex}
+.help-panel{width:520px;height:100vh;background:var(--bg3);border-left:1px solid var(--bdr2);display:flex;flex-direction:column;overflow:hidden;animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.help-top{height:48px;background:#040507;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 1.2rem;flex-shrink:0}
+.help-title{font-family:var(--ui);font-size:.72rem;font-weight:600;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;flex:1}
+.help-close{font-family:var(--mono);font-size:.7rem;padding:.2rem .5rem;background:transparent;border:1px solid var(--bdr);color:var(--t2);cursor:pointer;transition:all .2s}
+.help-close:hover{border-color:var(--red);color:var(--red)}
+.help-body{flex:1;overflow-y:auto;padding:1.5rem}
+.help-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:1.5rem}
+.htab{font-family:var(--ui);font-size:.65rem;letter-spacing:.1em;padding:.5rem 1rem;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase}
+.htab:hover{color:var(--t2)}.htab.act{color:var(--cyan);border-bottom-color:var(--cyan)}
+.htab-content{display:none}.htab-content.act{display:block}
+.help-h1{font-family:var(--ui);font-size:.9rem;font-weight:600;color:var(--cyan);margin-bottom:.6rem;margin-top:1.2rem;letter-spacing:.05em}
+.help-h1:first-child{margin-top:0}
+.help-h2{font-family:var(--ui);font-size:.75rem;font-weight:600;color:var(--amber);margin-bottom:.4rem;margin-top:.9rem}
+.help-p{font-size:.72rem;color:var(--t2);line-height:1.7;margin-bottom:.5rem}
+.help-step{display:flex;gap:.7rem;margin-bottom:.5rem;align-items:flex-start}
+.help-step-num{font-family:var(--mono);font-size:.65rem;color:var(--cyan);min-width:18px;margin-top:.1rem}
+.help-step-txt{font-size:.72rem;color:var(--t2);line-height:1.6}
+.help-kbtbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.62rem;margin-bottom:.8rem}
+.help-kbtbl tr{border-bottom:1px solid var(--bdr)}
+.help-kbtbl td{padding:.22rem .35rem;color:var(--t2)}
+.help-kbtbl td:first-child{color:var(--cyan);white-space:nowrap}
+.help-hutbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.62rem;margin-bottom:.8rem}
+.help-hutbl tr{border-bottom:1px solid var(--bdr)}
+.help-hutbl td{padding:.22rem .35rem;color:var(--t2)}
+.help-hutbl td:first-child{color:var(--amber)}
+.help-hutbl td:last-child{color:#00e0ff;text-align:right}
+.help-drntbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.62rem;margin-bottom:.8rem}
+.help-drntbl th{padding:.3rem .35rem;color:var(--t3);font-weight:normal;text-align:left;border-bottom:1px solid var(--bdr2)}
+.help-drntbl td{padding:.22rem .35rem;color:var(--t2);border-bottom:1px solid var(--bdr)}
+.help-drntbl td:first-child{color:var(--t1)}
+.help-tag{display:inline-block;font-family:var(--mono);font-size:.58rem;padding:.12rem .4rem;border:1px solid var(--bdr2);color:var(--t3);margin-right:.3rem;margin-bottom:.25rem}
+.help-note{background:rgba(0,136,255,.07);border:1px solid rgba(0,136,255,.2);padding:.6rem .8rem;font-size:.68rem;color:#6ab0ff;line-height:1.6;margin:.6rem 0}
+.help-warn{background:rgba(255,171,0,.07);border:1px solid rgba(255,171,0,.2);padding:.6rem .8rem;font-size:.68rem;color:var(--amber);line-height:1.6;margin:.6rem 0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg4)}
+::-webkit-scrollbar-thumb{background:var(--bdr2)}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="inst-logo">Universidad Siglo 21</div>
+  <div class="inst-name">Producción de Bioimágenes</div>
+  <div class="inst-carrera">Licenciatura en Producción de Bioimágenes</div>
+  <div class="login-divider"></div>
+  <div class="simurad-logo">SimuRad21</div>
+  <div class="simurad-sub">Plataforma de Simulación en Diagnóstico por Imágenes</div>
+  <div class="login-card">
+    <div class="login-title">Identificación del Estudiante</div>
+    <div class="lfield">
+      <label>Apellido y Nombre</label>
+      <input type="text" id="l-nombre" placeholder="Apellido, Nombre" oninput="chkLogin()">
+    </div>
+    <div class="lfield">
+      <label>N° de Legajo</label>
+      <input type="text" id="l-legajo" placeholder="000000" oninput="chkLogin()">
+    </div>
+    <div class="lfield">
+      <label>Año de cursada</label>
+      <select id="l-anio" style="background:var(--bg4);border:1px solid var(--bdr);color:var(--t1);padding:.55rem .7rem;font-family:var(--mono);font-size:.82rem;width:100%;outline:none" onchange="chkLogin()">
+        <option value="">— Seleccionar —</option>
+        <option>1° año</option><option>2° año</option><option>3° año</option><option>4° año</option>
+      </select>
+    </div>
+    <button class="login-btn" id="login-btn" disabled onclick="doLogin()">Ingresar →</button>
+    <div class="login-err" id="login-err">Complete todos los campos para continuar.</div>
+  </div>
+  <div style="font-family:var(--mono);font-size:.52rem;color:var(--t3);margin-top:2rem">by DC_S21 — v4.0</div>
+</div>
+
+<!-- ══ HUB ══ -->
+<div id="hubScreen">
+  <div class="hub-top">
+    <div class="hub-logo">SimuRad21</div>
+    <div class="hub-inst">Licenciatura en Producción de Bioimágenes</div>
+    <div class="hub-user">
+      <span>Estudiante: <span class="hub-user-name" id="hub-username">—</span></span>
+      <span id="hub-legajo" style="color:var(--t3)">—</span>
+      <button class="hub-help-btn" onclick="showHelp()">? Ayuda</button>
+      <button class="hub-logout" onclick="doLogout()">✕ Cerrar sesión</button>
+    </div>
+    <div class="hub-credit">by DC_S21</div>
+  </div>
+
+  <div class="hub-hero">
+    <div class="hub-hero-text">
+      <div class="hub-hero-title">Plataforma de Simulación <span>Clínica</span></div>
+      <div class="hub-hero-desc">Entorno educativo interactivo para el aprendizaje de técnicas de adquisición en diagnóstico por imágenes. Cada módulo simula una modalidad completa con casos clínicos reales, programación de parámetros y visualización de imágenes.</div>
+      <div class="hub-hero-tag">Seleccione un módulo para comenzar</div>
+    </div>
+  </div>
+
+  <div class="hub-body">
+    <div class="hub-section-title">Módulos Disponibles</div>
+    <div class="modules-grid">
+
+      <!-- CT Cerebro -->
+      <div class="module-card ct available" onclick="launchModule('ct')">
+        <div class="module-header">
+          <div class="module-icon">🧠</div>
+          <div class="module-info">
+            <div class="module-tag">Tomografía Computada</div>
+            <div class="module-name">SimuCT21 — Cerebro</div>
+          </div>
+        </div>
+        <div class="module-desc">Simulación completa de TC de cerebro. Planificación sobre scout view real, consola estilo SOMATOM, visor MPR con imágenes reales.</div>
+        <div class="module-features">
+          <span class="module-feat">Scout AP + Lateral</span>
+          <span class="module-feat">Visor MPR 3 planos</span>
+          <span class="module-feat">Cine</span>
+          <span class="module-feat">Dosimetría</span>
+          <span class="module-feat">Evaluación</span>
+        </div>
+        <div class="module-footer">
+          <div class="module-status">● Disponible</div>
+          <button class="module-launch" onclick="launchModule('ct');event.stopPropagation()">Iniciar →</button>
+        </div>
+      </div>
+
+      <!-- RX -->
+      <div class="module-card rx available" onclick="launchModule('rx')">
+        <div class="module-header">
+          <div class="module-icon">🦴</div>
+          <div class="module-info">
+            <div class="module-tag">Radiología Digital</div>
+            <div class="module-name">SimuRX21 — Proyecciones</div>
+          </div>
+        </div>
+        <div class="module-desc">Simulación de radiología convencional digital. Posicionamiento, factores técnicos, colimación, AEC y evaluación de imagen resultante.</div>
+        <div class="module-features">
+          <span class="module-feat">Posicionamiento</span>
+          <span class="module-feat">kV / mAs / DFR</span>
+          <span class="module-feat">AEC</span>
+          <span class="module-feat">DAP</span>
+          <span class="module-feat">Marcadores anatómicos</span>
+        </div>
+        <div class="module-footer">
+          <div class="module-status">● Disponible</div>
+          <button class="module-launch" onclick="launchModule('rx');event.stopPropagation()">Iniciar →</button>
+        </div>
+      </div>
+
+      <!-- CT Tórax (próximo) -->
+      <div class="module-card ct soon">
+        <div class="module-header">
+          <div class="module-icon">🫁</div>
+          <div class="module-info">
+            <div class="module-tag">Tomografía Computada</div>
+            <div class="module-name">SimuCT21 — Tórax</div>
+          </div>
+        </div>
+        <div class="module-desc">TC de tórax con protocolos de pulmón, mediastino y angioTC pulmonar. Presets específicos y dosimetría.</div>
+        <div class="module-features">
+          <span class="module-feat">Protocolo pulmón</span>
+          <span class="module-feat">AngioTC</span>
+          <span class="module-feat">MPR</span>
+        </div>
+        <div class="module-footer">
+          <div class="module-status">◌ Próximamente</div>
+          <button class="module-launch">Próximamente</button>
+        </div>
+      </div>
+
+      <!-- Mamografía (próximo) -->
+      <div class="module-card mg soon">
+        <div class="module-header">
+          <div class="module-icon">🔬</div>
+          <div class="module-info">
+            <div class="module-tag">Mamografía</div>
+            <div class="module-name">SimuMG21</div>
+          </div>
+        </div>
+        <div class="module-desc">Simulación de mamografía digital. Técnica CC y MLO, selección de ánodo/filtro, AEC, compresión y dosis glandular media.</div>
+        <div class="module-features">
+          <span class="module-feat">CC / MLO</span>
+          <span class="module-feat">Ánodo/Filtro</span>
+          <span class="module-feat">MGD</span>
+        </div>
+        <div class="module-footer">
+          <div class="module-status">◌ Próximamente</div>
+          <button class="module-launch">Próximamente</button>
+        </div>
+      </div>
+
+      <!-- MR (próximo) -->
+      <div class="module-card mr soon">
+        <div class="module-header">
+          <div class="module-icon">🧲</div>
+          <div class="module-info">
+            <div class="module-tag">Resonancia Magnética</div>
+            <div class="module-name">SimuRM21</div>
+          </div>
+        </div>
+        <div class="module-desc">Simulación de RM. Selección de secuencias, parámetros de adquisición, protocolos por región anatómica.</div>
+        <div class="module-features">
+          <span class="module-feat">Secuencias</span>
+          <span class="module-feat">TR / TE</span>
+          <span class="module-feat">SAR</span>
+        </div>
+        <div class="module-footer">
+          <div class="module-status">◌ Próximamente</div>
+          <button class="module-launch">Próximamente</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="font-family:var(--mono);font-size:.58rem;color:var(--t3);text-align:center;margin-top:1rem;border-top:1px solid var(--bdr);padding-top:1rem">
+      SimuRad21 v4.0 — Plataforma educativa de simulación clínica en diagnóstico por imágenes — by DC_S21
+    </div>
+  </div>
+</div>
+
+<!-- ══ HELP PANEL ══ -->
+<div class="help-overlay" id="helpOverlay" onclick="hideHelp()">
+  <div class="help-panel" onclick="event.stopPropagation()">
+    <div class="help-top">
+      <div class="help-title">📖 Instructivo y Ayuda — SimuRad21</div>
+      <button class="help-close" onclick="hideHelp()">✕ Cerrar</button>
+    </div>
+    <div class="help-body">
+      <div class="help-tabs">
+        <div class="htab act" onclick="showHTab('general')">General</div>
+        <div class="htab" onclick="showHTab('ct')">SimuCT21</div>
+        <div class="htab" onclick="showHTab('rx')">SimuRX21</div>
+        <div class="htab" onclick="showHTab('teclas')">Teclas</div>
+        <div class="htab" onclick="showHTab('ref')">Referencias</div>
+      </div>
+
+      <!-- General -->
+      <div class="htab-content act" id="htab-general">
+        <div class="help-h1">¿Qué es SimuRad21?</div>
+        <div class="help-p">SimuRad21 es una plataforma educativa de simulación clínica en diagnóstico por imágenes, diseñada para estudiantes de la Licenciatura en Producción de Bioimágenes. Permite practicar la programación de estudios, el posicionamiento y la evaluación de imágenes en un entorno seguro y sin radiación real.</div>
+        <div class="help-h1">Cómo ingresar</div>
+        <div class="help-step"><div class="help-step-num">1</div><div class="help-step-txt">Ingrese su nombre completo (apellido y nombre), número de legajo y año de cursada en la pantalla de login.</div></div>
+        <div class="help-step"><div class="help-step-num">2</div><div class="help-step-txt">Haga clic en <strong>Ingresar</strong>. Sus datos se usarán para identificarlo en la evaluación.</div></div>
+        <div class="help-step"><div class="help-step-num">3</div><div class="help-step-txt">Desde el hub principal, seleccione el módulo que desea simular.</div></div>
+        <div class="help-h1">Modos de trabajo</div>
+        <div class="help-h2">🎓 Modo Training</div>
+        <div class="help-p">Retroalimentación en tiempo real mientras ajusta los parámetros. Ideal para aprender y practicar sin presión evaluativa.</div>
+        <div class="help-h2">📋 Modo Evaluación</div>
+        <div class="help-p">Sin asistencia durante la simulación. Al finalizar se muestra un resumen detallado con puntuación por criterio.</div>
+        <div class="help-h1">Flujo general de cada módulo</div>
+        <div class="help-step"><div class="help-step-num">1</div><div class="help-step-txt"><strong>Admisión:</strong> carga de datos del paciente, historia clínica y pistas clínicas progresivas. Selección del protocolo o proyección.</div></div>
+        <div class="help-step"><div class="help-step-num">2</div><div class="help-step-txt"><strong>Planificación/Programación:</strong> ajuste de todos los parámetros técnicos. Identificación y corrección de errores presteados.</div></div>
+        <div class="help-step"><div class="help-step-num">3</div><div class="help-step-txt"><strong>Visor:</strong> visualización de la imagen resultante con herramientas de análisis. Evaluación final.</div></div>
+        <div class="help-note">💡 Puede navegar entre los pasos usando las pestañas superiores o los botones de volver/continuar.</div>
+      </div>
+
+      <!-- SimuCT21 -->
+      <div class="htab-content" id="htab-ct">
+        <div class="help-h1">SimuCT21 — Tomografía Computada</div>
+        <div class="help-p">Simulador de TC con consola estilo Siemens SOMATOM Definition AS+. Incluye imágenes reales de scouts y cortes volumétricos.</div>
+        <div class="help-h2">Instancia 1 — Admisión</div>
+        <div class="help-p">Complete los datos del paciente. Seleccione el protocolo adecuado según el caso clínico. Las pistas se revelan progresivamente con el botón <em>Revelar siguiente pista</em>.</div>
+        <div class="help-h2">Instancia 2 — Consola de Planificación</div>
+        <div class="help-p">Los parámetros arrancan con errores deliberados. Identifíquelos por el color rojo y corríjalos. Puede mover el slider o hacer <strong>click sobre el valor numérico</strong> para editar manualmente.</div>
+        <div class="help-p">Las líneas azules sobre el scout view son arrastrables. La línea superior (TOP) y la inferior (BTM) definen la cobertura del escán.</div>
+        <div class="help-h2">Instancia 3 — Visor MPR</div>
+        <div class="help-p">Tres planos simultáneos (Axial, Coronal, Sagital). Use la rueda del mouse para desplazarse entre cortes. Haga doble click en un panel para verlo en pantalla completa.</div>
+        <div class="help-warn">⚠ Los valores HU mostrados por la herramienta ROI son aproximados, calculados a partir de la imagen ya procesada con ventana de parénquima.</div>
+        <div class="help-h2">Parámetros evaluados</div>
+        <div class="help-p">kV correcto según peso · Pitch · Kernel · Grosor de corte · SAFIRE · CTDIvol vs DRN · ATCM · Protocolo · Colimación · Datos del paciente</div>
+      </div>
+
+      <!-- SimuRX21 -->
+      <div class="htab-content" id="htab-rx">
+        <div class="help-h1">SimuRX21 — Radiología Digital</div>
+        <div class="help-p">Simulador de radiología convencional digital. Permite practicar posicionamiento, factores técnicos y evaluación de imagen para distintas regiones anatómicas.</div>
+        <div class="help-h2">Instancia 1 — Admisión</div>
+        <div class="help-p">Complete los datos del paciente y seleccione la región anatómica y la proyección desde la lista desplegable. Las pistas clínicas orientan el caso.</div>
+        <div class="help-h2">Instancia 2 — Consola de Programación</div>
+        <div class="help-p">Corrija los parámetros erróneos presteados. El diagrama de posicionamiento se actualiza según la región y proyección seleccionadas.</div>
+        <div class="help-p">Parámetros a configurar: <span class="help-tag">kV</span><span class="help-tag">mAs</span><span class="help-tag">DFR</span><span class="help-tag">Foco</span><span class="help-tag">Grilla</span><span class="help-tag">AEC</span><span class="help-tag">Chasis</span><span class="help-tag">Angulación rayo</span></div>
+        <div class="help-h2">Instancia 3 — Visor RX</div>
+        <div class="help-p">Imagen real de la proyección seleccionada. Active los marcadores anatómicos con el botón correspondiente para identificar estructuras clave.</div>
+        <div class="help-h2">Parámetros evaluados</div>
+        <div class="help-p">kV · mAs · DFR · Foco · Grilla · AEC · Chasis y orientación · Dirección del rayo · DAP vs DRN · Datos del paciente</div>
+      </div>
+
+      <!-- Teclas -->
+      <div class="htab-content" id="htab-teclas">
+        <div class="help-h1">Teclas de Acceso Directo — Visor</div>
+        <div class="help-p">Las siguientes teclas funcionan en la Instancia 3 (Visor) de cualquier módulo:</div>
+        <table class="help-kbtbl">
+          <tr><td>A</td><td>Activar herramienta W/L (ajuste de ventana)</td></tr>
+          <tr><td>Z</td><td>Activar herramienta Zoom</td></tr>
+          <tr><td>P</td><td>Activar herramienta Pan (desplazamiento)</td></tr>
+          <tr><td>R</td><td>Activar herramienta Rotar</td></tr>
+          <tr><td>↑ / ↓</td><td>Desplazarse entre cortes (plano activo)</td></tr>
+          <tr><td>← / →</td><td>Corte anterior / siguiente</td></tr>
+          <tr><td>Space</td><td>Play / Pause del cine</td></tr>
+          <tr><td>1</td><td>Layout 1×1 (pantalla completa)</td></tr>
+          <tr><td>2</td><td>Layout 1×2</td></tr>
+          <tr><td>4</td><td>Layout 2×2</td></tr>
+          <tr><td>F1</td><td>Preset Cerebro (W:80 / L:40)</td></tr>
+          <tr><td>F2</td><td>Preset Hueso (W:2000 / L:400)</td></tr>
+          <tr><td>F3</td><td>Preset Subdural (W:150 / L:75)</td></tr>
+          <tr><td>F4</td><td>Preset Isquemia (W:40 / L:30)</td></tr>
+          <tr><td>Ctrl+F</td><td>Reset de zoom, pan y rotación</td></tr>
+          <tr><td>Alt+I</td><td>Invertir imagen (negativo)</td></tr>
+          <tr><td>Doble click</td><td>Pantalla completa del panel / restaurar</td></tr>
+        </table>
+        <div class="help-h1">Herramientas de medición</div>
+        <table class="help-kbtbl">
+          <tr><td>📏 Regla</td><td>Dos clicks: mide distancia en mm</td></tr>
+          <tr><td>∠ Ángulo</td><td>Tres clicks: mide ángulo en grados</td></tr>
+          <tr><td>◉ ROI Punto</td><td>Un click: valor HU aproximado del punto</td></tr>
+          <tr><td>◯ ROI Oval</td><td>Arrastrar: HU media y SD de la región</td></tr>
+        </table>
+        <div class="help-note">💡 En el Scout View (paso 2): arrastre las líneas de planificación TOP y BTM para definir la cobertura del escán.</div>
+      </div>
+
+      <!-- Referencias -->
+      <div class="htab-content" id="htab-ref">
+        <div class="help-h1">Tabla de referencia HU</div>
+        <table class="help-hutbl">
+          <tr><td>Aire</td><td>-1000 HU</td></tr>
+          <tr><td>Grasa</td><td>-120 a -60 HU</td></tr>
+          <tr><td>Agua / LCR</td><td>0 – 15 HU</td></tr>
+          <tr><td>Sustancia blanca</td><td>20 – 30 HU</td></tr>
+          <tr><td>Sustancia gris</td><td>32 – 42 HU</td></tr>
+          <tr><td>Sangre aguda</td><td>55 – 80 HU</td></tr>
+          <tr><td>Coágulo organizado</td><td>25 – 45 HU</td></tr>
+          <tr><td>Calcificación</td><td>80 – 300 HU</td></tr>
+          <tr><td>Hueso cortical</td><td>300 – 1000 HU</td></tr>
+        </table>
+        <div class="help-h1">Niveles de Referencia Diagnóstica — TC</div>
+        <table class="help-drntbl">
+          <tr><th>Región</th><th>CTDIvol</th><th>DLP</th></tr>
+          <tr><td>Cráneo</td><td>≤ 60 mGy</td><td>≤ 1050 mGy·cm</td></tr>
+          <tr><td>Tórax</td><td>≤ 10 mGy</td><td>≤ 400 mGy·cm</td></tr>
+          <tr><td>Abdomen</td><td>≤ 15 mGy</td><td>≤ 600 mGy·cm</td></tr>
+          <tr><td>Columna L</td><td>≤ 35 mGy</td><td>≤ 560 mGy·cm</td></tr>
+        </table>
+        <div class="help-h1">Niveles de Referencia Diagnóstica — RX</div>
+        <table class="help-drntbl">
+          <tr><th>Proyección</th><th>ESD</th><th>DAP</th></tr>
+          <tr><td>Tórax PA</td><td>≤ 0.4 mGy</td><td>≤ 100 µGy·m²</td></tr>
+          <tr><td>Columna L AP</td><td>≤ 10 mGy</td><td>≤ 400 µGy·m²</td></tr>
+          <tr><td>Columna L Lat</td><td>≤ 30 mGy</td><td>≤ 900 µGy·m²</td></tr>
+          <tr><td>Pelvis AP</td><td>≤ 10 mGy</td><td>≤ 400 µGy·m²</td></tr>
+          <tr><td>Cráneo AP/PA</td><td>≤ 5 mGy</td><td>≤ 200 µGy·m²</td></tr>
+          <tr><td>Cráneo Lateral</td><td>≤ 3 mGy</td><td>≤ 100 µGy·m²</td></tr>
+        </table>
+        <div class="help-h1">Créditos</div>
+        <div class="help-p">SimuRad21 — Plataforma educativa de simulación clínica en diagnóstico por imágenes.<br>Desarrollado para la Licenciatura en Producción de Bioimágenes.<br><span style="color:var(--cyan)">by DC_S21 — v4.0</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── LOGIN ──
+function chkLogin(){
+  const n=document.getElementById('l-nombre').value.trim();
+  const l=document.getElementById('l-legajo').value.trim();
+  const a=document.getElementById('l-anio').value;
+  document.getElementById('login-btn').disabled=!(n&&l&&a);
+}
+
+function doLogin(){
+  const n=document.getElementById('l-nombre').value.trim();
+  const l=document.getElementById('l-legajo').value.trim();
+  const a=document.getElementById('l-anio').value;
+  if(!n||!l||!a){document.getElementById('login-err').style.display='block';return;}
+  // Store in sessionStorage for modules to read
+  sessionStorage.setItem('srad_nombre',n);
+  sessionStorage.setItem('srad_legajo',l);
+  sessionStorage.setItem('srad_anio',a);
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('hubScreen').style.display='flex';
+  document.getElementById('hub-username').textContent=n;
+  document.getElementById('hub-legajo').textContent='Legajo: '+l+' | '+a;
+}
+
+function doLogout(){
+  if(confirm('¿Cerrar sesión?')){
+    sessionStorage.clear();
+    document.getElementById('hubScreen').style.display='none';
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('l-nombre').value='';
+    document.getElementById('l-legajo').value='';
+    document.getElementById('l-anio').value='';
+    document.getElementById('login-btn').disabled=true;
+  }
+}
+
+// ── MODULE LAUNCH ──
+function launchModule(mod){
+  const files={ct:'SimuCT21.html',rx:'SimuRX21.html'};
+  if(files[mod]) window.location.href=files[mod];
+}
+
+// ── HELP PANEL ──
+function showHelp(){document.getElementById('helpOverlay').classList.add('act');}
+function hideHelp(){document.getElementById('helpOverlay').classList.remove('act');}
+function showHTab(id){
+  document.querySelectorAll('.htab').forEach(t=>t.classList.remove('act'));
+  document.querySelectorAll('.htab-content').forEach(t=>t.classList.remove('act'));
+  document.getElementById('htab-'+id).classList.add('act');
+  // find tab button
+  document.querySelectorAll('.htab').forEach(t=>{if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+id+"'"))t.classList.add('act');});
+}
+
+// Auto-login if session exists
+window.addEventListener('load',()=>{
+  const n=sessionStorage.getItem('srad_nombre');
+  const l=sessionStorage.getItem('srad_legajo');
+  const a=sessionStorage.getItem('srad_anio');
+  if(n&&l&&a){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('hubScreen').style.display='flex';
+    document.getElementById('hub-username').textContent=n;
+    document.getElementById('hub-legajo').textContent='Legajo: '+l+' | '+a;
+  }
+});
+
+// Keyboard shortcut for help
+document.addEventListener('keydown',e=>{if(e.key==='F1'){e.preventDefault();showHelp();}if(e.key==='Escape')hideHelp();});
+</script>
+</body>
+</html>
